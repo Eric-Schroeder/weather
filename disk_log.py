@@ -6,10 +6,6 @@ import subprocess
 
 
 class DiskLog:
-    logging.basicConfig(filename='/home/pi/weather/disk_space.log',
-                        format='%(asctime)s\n %(levelname)s:%(message)s',
-                        datefmt='%m/%d/%Y %I:%M:%S %p',
-                        level=logging.INFO)
 
     def check_disk_usage(self):
         disk_limit = 90
@@ -45,4 +41,4 @@ class DiskLog:
         disk_used = re.findall('\d{1,3}?(?=%)', disk)
         disk_used = ''.join(disk_used)
         disk_used = int(disk_used)
-        return disk_used
+        return "SD card at {}%".format(disk_used)

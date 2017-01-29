@@ -62,8 +62,8 @@ class Weather:
         try:
             response = ntplib.NTPClient().request('10.0.0.120')
             current_time = response.tx_time
-        except ntplib.NTPException as err:
+        except (ntplib.NTPException, OSError) as err:
             print('We had an error! Please check the log file.')
-            logging.error('NTP Error:%s' % err)
+            logging.error("FROM:weather/get_time:{}".format(err))
             current_time = None
         return current_time

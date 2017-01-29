@@ -19,7 +19,7 @@ HOST = '10.0.0.120'
 logging.basicConfig(filename='/home/pi/weather/weather.log',
                     format='%(asctime)s\n %(levelname)s:%(message)s',
                     datefmt='%m/%d/%Y %I:%M:%S %p',
-                    level=logging.ERROR)
+                    level=logging.INFO)
 logging.getLogger("urllib3").setLevel(logging.WARNING)
 
 db = MySQLDatabase('test', host=HOST, user='eric', passwd='vopo73')
@@ -55,11 +55,6 @@ def debug():
     return debug
 
 
-def log_error(err):
-    print('We had an error! Please check the log file.')
-    logging.error(err)
-
-
 def wifi_status():
     print('Connecting...')
     tries = 20
@@ -72,7 +67,7 @@ def wifi_status():
             sys.stdout.write("\r\x1b[K" + "Try number: " + str(x + 1))
             if x == tries - 1:
                 print('\nConnection error! Please check the log file.')
-                logging.error(err)
+                logging.error("FROM:weather_main/wifi_status:{}".format(err))
         else:
             wifi = 'on'
 
@@ -85,7 +80,8 @@ def database_connection():
     try:
         db.connect()
     except OperationalError as err:
-        log_error(err)
+        print('We had an error! Please check the log file.')
+        logging.error("FROM:weather_main/database_connection:{}".format(err))
         return
     db.create_tables([WeatherData], safe=True)
     add_weather_data()
@@ -104,12 +100,14 @@ def take_image():
         camera = picamera.PiCamera()
         camera.resolution = (1296, 972)
     except picamera.exc.PiCameraMMALError as err:
-        log_error(err)
+        print('We had an error! Please check the log file.')
+        logging.error("FROM:weather_main/take_image:{}".format(err))
         return
     try:
         time_stamp = time.strftime('%Y_%m_%d_%H_%M_%S', time.localtime(Weather.get_time()))
     except AttributeError as err:
-        log_error(err)
+        print('We had an error! Please check the log file.')
+        logging.error("FROM:weather_main/take_image:{}".format(err))
         return
     image_file = "/home/pi/weather/images/" + time_stamp + ".jpg"
     camera.capture(image_file)
@@ -121,7 +119,8 @@ def send_image():
     try:
         s.connect((HOST, port))
     except OSError as err:
-        log_error(err)
+        print('We had an error! Please check the log file.')
+        logging.error("FROM:weather_main/send_image:{}".format(err))
         return
     image = max(glob.iglob('/home/pi/weather/images/*.jpg'), key=os.path.getctime)
     f = open(image, "rb")
@@ -133,7 +132,8 @@ def send_image():
             s.send(l)
             l = f.read(2048)
     except socket.timeout as err:
-        log_error(err)
+        print('We had an error! Please check the log file.')
+        logging.error("FROM:weather_main/send_image:{}".format(err))
         return
     f.close()
     s.close()
