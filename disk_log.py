@@ -19,10 +19,11 @@ class DiskLog:
         gmail_pwd = '??whyASK!'
         message = """From: %s\nTo: %s\nSubject: %s\n\n%s
             """ % (sender, ", ".join(reciver), subject, text)
+        log_message = "SD card at {}%".format(self.get_disk_used())
 
         if self.get_disk_used() >= disk_limit:
             try:
-                logging.info('Disk usage at {}%'.format(self.get_disk_used()))
+                logging.info(log_message)
                 server = smtplib.SMTP("smtp.gmail.com", 587)
                 server.ehlo()
                 server.starttls()
@@ -32,8 +33,8 @@ class DiskLog:
             except smtplib.SMTPAuthenticationError:
                 logging.error("Could not send 'disk full' email.")
         else:
-            logging.info('Disk usage at {}%'.format(self.get_disk_used()))
-            print(self.get_disk_used())
+            logging.info(log_message)
+            print(log_message)
 
     @staticmethod
     def get_disk_used():
@@ -41,4 +42,4 @@ class DiskLog:
         disk_used = re.findall('\d{1,3}?(?=%)', disk)
         disk_used = ''.join(disk_used)
         disk_used = int(disk_used)
-        return "SD card at {}%".format(disk_used)
+        return disk_used
